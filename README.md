@@ -157,15 +157,21 @@ The same pattern grouped by season as a bar chart, winter and autumn both sittin
 
 The single most important chart in the whole project, gas share nearly doubling on low wind days compared with the rest of the year, built here in Python before this same result was later verified independently in both SQL and Power BI.
 
+**Writing up the key finding directly in the notebook**
+
+![Key finding markdown cell](images/py_09_key_finding.png)
+
+With the pattern confirmed across all three charts, the headline finding was written up as a Markdown cell directly in the notebook, stating the core numbers plainly, gas share nearly doubling from 25.5 to 45.1 per cent on the 17 low wind days identified earlier, before this same wording was carried through into the Power BI report itself. Writing the finding immediately after the charts that prove it, rather than only at the very end of the project, kept the analysis honest about exactly what the data showed at each stage.
+
 **Fixing a genuine timezone bug**
 
-![Fixing the BST clock change bug](images/py_09_timezone_fix.png)
+![Fixing the BST clock change bug](images/py_10_timezone_fix.png)
 
 While loading the cleaned data into MySQL, a single row failed with an "incorrect datetime value" error for 29 March 2026 at 1am. This is the exact date and hour the UK clocks spring forward for British Summer Time, meaning that specific local time technically does not exist. The fix was to force every timestamp to be interpreted as UTC first, then strip the timezone label afterwards, rather than trying to store an ambiguous local time directly.
 
 **Loading into MySQL**
 
-![Loading the cleaned data into MySQL](images/py_10_mysql_load.png)
+![Loading the cleaned data into MySQL](images/py_11_mysql_load.png)
 
 The cleaned dataframe was loaded into a local MySQL database using `pandas.to_sql()` with `sqlalchemy` and `pymysql`, rather than `LOAD DATA INFILE`, which repeatedly hit local file permission restrictions in this environment. Row count in MySQL matched the cleaned dataframe exactly, 17,012 rows.
 
