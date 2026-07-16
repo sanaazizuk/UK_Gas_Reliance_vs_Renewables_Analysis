@@ -36,7 +36,6 @@ A one page Power BI report analysing over 17,000 half hourly UK generation recor
 | Cleaned dataset | The final cleaned CSV output, also loaded into MySQL | [uk_generation_mix_cleaned.csv](./uk_generation_mix_cleaned.csv) |
 | SQL queries | All business question queries used to answer the report's core questions | [uk_generation_mix_sql.sql](./uk_generation_mix_sql.sql) |
 | Power BI report | Full one page .pbix file, open in Power BI Desktop to explore | [Download .pbix](./uk_energy.pbix) |
-| Power BI theme | Custom gold and black colour theme used throughout the report | [uk_energy_gold_black_theme_1.json](./uk_energy_gold_black_theme_1.json) |
 
 ---
 
