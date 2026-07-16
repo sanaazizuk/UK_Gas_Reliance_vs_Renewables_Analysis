@@ -15,7 +15,7 @@
 
 ## TL;DR
 
-A one page Power BI dashboard analysing over 17,000 half hourly UK generation records across 12 months, built on a cleaned dataset with Python, explored through SQL, and finished with a custom gold and black themed Power BI report, KPI cards, and a heatmap.
+A one page Power BI report analysing over 17,000 half hourly UK generation records across 12 months, built on a cleaned dataset with Python, explored through SQL, and finished with a custom gold and black themed Power BI report, KPI cards, and a heatmap.
 
 **Key findings:**
 
@@ -31,12 +31,12 @@ A one page Power BI dashboard analysing over 17,000 half hourly UK generation re
 
 | File | Description | Link |
 |---|---|---|
-| Raw data | Original, unmodified 12 month half hourly export from the National Grid ESO Carbon Intensity API | [Raw data folder](./Raw%20data) |
-| Python cleaning and analysis | Fetches, cleans, and derives all time based columns, then explores the data with charts | [uk_generation_mix_analysis.ipynb](./uk_generation_mix_analysis.ipynb) |
-| Python, loading to MySQL | Loads the cleaned CSV into a local MySQL database | [uploading_to_MYSQL.ipynb](./uploading_to_MYSQL.ipynb) |
-| SQL queries | All business question queries used to answer the report's core questions | [uk_energy_sql.sql](./uk_energy_sql.sql) |
+| Raw data | Original, unmodified 12 month half hourly export from the National Grid ESO Carbon Intensity API | [Raw Data folder](./Raw%20Data) |
+| Python cleaning, analysis, and MySQL upload | Fetches, cleans, and derives all time based columns, explores the data with charts, then loads the cleaned data directly into MySQL | [uk_generation_mix_cleaned.ipynb](./uk_generation_mix_cleaned.ipynb) |
+| Cleaned dataset | The final cleaned CSV output, also loaded into MySQL | [uk_generation_mix_cleaned.csv](./uk_generation_mix_cleaned.csv) |
+| SQL queries | All business question queries used to answer the report's core questions | [uk_generation_mix_sql.sql](./uk_generation_mix_sql.sql) |
 | Power BI report | Full one page .pbix file, open in Power BI Desktop to explore | [Download .pbix](./uk_energy.pbix) |
-| Power BI theme | Custom gold and black colour theme used throughout the report | [uk_energy_gold_black_theme.json](./uk_energy_gold_black_theme.json) |
+| Power BI theme | Custom gold and black colour theme used throughout the report | [uk_energy_gold_black_theme_1.json](./uk_energy_gold_black_theme_1.json) |
 
 ---
 
@@ -52,7 +52,7 @@ The goal throughout was to give an honest account of what the data actually show
 
 ## Project Overview
 
-A data analysis project looking at UK gas reliance and renewable generation between April 2025 and March 2026. Built for a portfolio piece using real National Grid ESO Carbon Intensity data, working through the full pipeline: raw data, Python cleaning, MySQL, SQL analysis, and a one page interactive Power BI dashboard.
+A data analysis project looking at UK gas reliance and renewable generation between April 2025 and March 2026. Built for a portfolio piece using real National Grid ESO Carbon Intensity data, working through the full pipeline: raw data, Python cleaning, MySQL, SQL analysis, and a one page interactive Power BI report.
 
 The project covers **17,012 half hourly generation records** across **12 consecutive months**, spanning every fuel type in the UK generation mix, gas, wind, solar, nuclear, biomass, hydro, coal, and imports.
 
@@ -64,14 +64,13 @@ The core question: as renewables have grown, has UK gas reliance genuinely falle
 
 #### Datasets
 
-- The raw dataset can be found in the `Raw data` folder
-- The cleaned dataset, `uk_generation_mix_cleaned.csv`, is produced by the Python notebook below and loaded directly into MySQL
+- The raw dataset can be found in the `Raw Data` folder
+- The cleaned dataset, `uk_generation_mix_cleaned.csv`, is produced by the Python notebook below and loaded directly into MySQL from within the same notebook
 
 #### Data Cleaning and Analysis
 
-- The full Python cleaning and exploratory work is in [uk_generation_mix_analysis.ipynb](./uk_generation_mix_analysis.ipynb)
-- The MySQL loading step is in [uploading_to_MYSQL.ipynb](./uploading_to_MYSQL.ipynb)
-- The SQL queries used to answer all business questions are in [uk_energy_sql.sql](./uk_energy_sql.sql)
+- The full Python cleaning, exploratory work, and MySQL loading step are all in [uk_generation_mix_cleaned.ipynb](./uk_generation_mix_cleaned.ipynb)
+- The SQL queries used to answer all business questions are in [uk_generation_mix_sql.sql](./uk_generation_mix_sql.sql)
 - The finished one page Power BI report can be found in this repository as a .pbix file
 
 ---
@@ -82,7 +81,7 @@ The core question: as renewables have grown, has UK gas reliance genuinely falle
 |---|---|
 | Programming and cleaning | Python (Pandas, Matplotlib), Jupyter Notebook |
 | Database management | MySQL, SQLAlchemy, PyMySQL |
-| Visualisation and dashboard | Power BI |
+| Visualisation and reporting | Power BI |
 | Data storage | CSV files |
 | Version control | GitHub |
 
@@ -104,9 +103,11 @@ This produced a single raw CSV, `uk_generation_mix_12mo.csv`, covering 17,012 ha
 
 ---
 
-### Phase 2: Data Cleaning (Python and Pandas)
+### Phase 2: Data Cleaning, Analysis, and MySQL Upload (Python and Pandas)
 
-**Notebook:** [uk_generation_mix_analysis.ipynb](./uk_generation_mix_analysis.ipynb)
+**Notebook:** [uk_generation_mix_cleaned.ipynb](./uk_generation_mix_cleaned.ipynb)
+
+This single notebook covers the full Python side of the project: cleaning the raw API export, deriving every time based column, exploring the data with charts, and finally loading the cleaned result straight into MySQL. Keeping this in one notebook meant the cleaned dataframe could be pushed into MySQL directly with `pandas.to_sql()`, without needing to re read a CSV in a separate file first.
 
 Before any analysis, the raw API export needed genuine cleaning, most notably a subtle timezone bug that would have blocked the MySQL load entirely if left unfixed.
 
@@ -146,25 +147,21 @@ A day was flagged as a low wind day if its average wind output across all 48 hal
 
 While loading the cleaned data into MySQL, a single row failed with an "incorrect datetime value" error for 29 March 2026 at 1am. This is the exact date and hour the UK clocks spring forward for British Summer Time, meaning that specific local time technically does not exist. The fix was to force every timestamp to be interpreted as UTC first, then strip the timezone label afterwards, rather than trying to store an ambiguous local time directly.
 
-Final cleaned dataset: **17,012 rows**, 20 columns after all derived fields were added, ready for MySQL.
-
----
-
-### Phase 3: Loading into MySQL
-
-**Notebook:** [uploading_to_MYSQL.ipynb](./uploading_to_MYSQL.ipynb)
+**Loading into MySQL**
 
 ![Loading the cleaned data into MySQL](images/py_07_mysql_load.png)
 
-The cleaned CSV was loaded into a local MySQL database using `pandas.to_sql()` with `sqlalchemy` and `pymysql`, rather than `LOAD DATA INFILE`, which repeatedly hit local file permission restrictions in this environment. Row count in MySQL matched the cleaned CSV exactly, 17,012 rows.
+The cleaned dataframe was loaded into a local MySQL database using `pandas.to_sql()` with `sqlalchemy` and `pymysql`, rather than `LOAD DATA INFILE`, which repeatedly hit local file permission restrictions in this environment. Row count in MySQL matched the cleaned dataframe exactly, 17,012 rows.
+
+Final cleaned dataset: **17,012 rows**, 20 columns after all derived fields were added, exported as `uk_generation_mix_cleaned.csv` and loaded directly into MySQL.
 
 ---
 
-### Phase 4: Exploratory Data Analysis (SQL)
+### Phase 3: Exploratory Data Analysis (SQL)
 
-**Queries:** [uk_energy_sql.sql](./uk_energy_sql.sql)
+**Queries:** [uk_generation_mix_sql.sql](./uk_generation_mix_sql.sql)
 
-Each query below was written to answer a specific business question, and every result was cross checked directly against both the Python analysis and the Power BI dashboard before being finalised.
+Each query below was written to answer a specific business question, and every result was cross checked directly against both the Python analysis and the Power BI report before being finalised.
 
 ---
 
@@ -279,15 +276,15 @@ Using a window function to calculate month over month change reveals the sharpes
 
 ---
 
-### Phase 5: Advanced Analysis and Visual Design (Power BI)
+### Phase 4: Advanced Analysis and Visual Design (Power BI)
 
 Moved into Power BI for the visual and interactive work. All screenshots are in the `images` folder.
 
 ---
 
-## Dashboard: UK Gas Reliance vs Renewables
+## Report: UK Gas Reliance vs Renewables
 
-![Dashboard screenshot](images/dashboard.png)
+![Report screenshot](images/report.png)
 
 This is a single page report, designed to answer the project's headline question within the first ten seconds, then support it with progressively more detailed visuals underneath.
 
@@ -309,7 +306,7 @@ This is a single page report, designed to answer the project's headline question
 
 **Gas share by hour and month, heatmap matrix** The centrepiece visual of the report. Every hour bucket across every month, shaded from dark brown at low gas reliance through to coral at high gas reliance, using a custom colour scale matching the report's theme. Winter evening cells, particularly December and January between 4pm and 8pm, stand out immediately as the darkest, highest reliance cells on the entire grid, a single glance proof of the report's central finding.
 
-**Report outcome:** this dashboard proves, using real half hourly data, real SQL aggregation, and live Power BI measures throughout, that UK gas reliance has not disappeared as renewables have grown. It has concentrated into specific, identifiable, and largely predictable conditions, low wind days, winter evenings, and one genuine multi day low wind spell that can be pinpointed directly in the data.
+**Report outcome:** this report proves, using real half hourly data, real SQL aggregation, and live Power BI measures throughout, that UK gas reliance has not disappeared as renewables have grown. It has concentrated into specific, identifiable, and largely predictable conditions, low wind days, winter evenings, and one genuine multi day low wind spell that can be pinpointed directly in the data.
 
 ---
 
