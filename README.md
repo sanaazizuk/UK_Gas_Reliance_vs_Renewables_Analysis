@@ -3,7 +3,7 @@
 **Industry:** Energy and Utilities
 **Data period:** April 2025 to March 2026
 
-> **A note on the data:** every figure in this project comes from real, publicly available data from the National Grid ESO Carbon Intensity API, covering half hourly UK electricity generation across twelve consecutive months. Nothing here is simulated or estimated. Every number quoted in this README was checked directly against the underlying SQL and Power BI output before being written down.
+> **A note on the data:** every figure in this project comes from real, publicly available data from the National Grid ESO Carbon Intensity website, covering half hourly UK electricity generation across twelve consecutive months. Nothing here is simulated or estimated. Every number quoted in this README was checked directly against the underlying SQL and Power BI output before being written down.
 
 ---
 
@@ -31,7 +31,7 @@ A one page Power BI report analysing over 17,000 half hourly UK generation recor
 
 | File | Description | Link |
 |---|---|---|
-| Raw data | Original, unmodified 12 month half hourly export from the National Grid ESO Carbon Intensity API | [Raw Data folder](./Raw%20Data) |
+| Raw data | Original, unmodified 12 month half hourly export from the National Grid ESO Carbon Intensity website | [Raw Data folder](./Raw%20Data) |
 | Python cleaning, analysis, and MySQL upload | Fetches, cleans, and derives all time based columns, explores the data with charts, then loads the cleaned data directly into MySQL | [uk_generation_mix_cleaned.ipynb](./uk_generation_mix_cleaned.ipynb) |
 | Cleaned dataset | The final cleaned CSV output, also loaded into MySQL | [uk_generation_mix_cleaned.csv](./uk_generation_mix_cleaned.csv) |
 | SQL queries | All business question queries used to answer the report's core questions | [uk_generation_mix_sql.sql](./uk_generation_mix_sql.sql) |
@@ -93,13 +93,13 @@ The core question: as renewables have grown, has UK gas reliance genuinely falle
 
 ### Phase 1: Data Collection
 
-Source data was pulled directly from the [National Grid ESO Carbon Intensity API](https://carbonintensity.org.uk/), a free public API requiring no key, filtered and scoped deliberately to keep the project focused:
+Source data was taken directly from the [National Grid ESO Carbon Intensity website](https://carbonintensity.org.uk/), a free public data source requiring no account or key, filtered and scoped deliberately to keep the project focused:
 
 - **Time range:** 1 April 2025 to 31 March 2026, 12 consecutive months, half hourly resolution
-- **Endpoint used:** `/generation/{from}/{to}`, returning the percentage generation mix by fuel type for every half hour period
-- **Chunking:** the API limits requests to 14 days at a time, so the full 12 month pull was built as a loop across roughly 26 sequential requests, then combined into a single dataframe
+- **Data retrieved:** the percentage generation mix by fuel type for every half hour period across the year
+- **Collection method:** the website only allows data to be retrieved in 14 day windows at a time, so the full 12 month pull was built in Python as a loop across roughly 26 sequential requests, then combined into a single dataframe
 
-This produced a single raw CSV, `uk_generation_mix_12mo.csv`, covering 17,012 half hourly rows across 11 original columns, `from`, `to`, and the percentage share of biomass, coal, imports, gas, nuclear, other, hydro, solar, and wind. This raw file sits in the `Raw data` folder in this repository.
+This produced a single raw CSV, `uk_generation_mix_12mo.csv`, covering 17,012 half hourly rows across 11 original columns, `from`, `to`, and the percentage share of biomass, coal, imports, gas, nuclear, other, hydro, solar, and wind. This raw file sits in the `Raw Data` folder in this repository.
 
 ---
 
@@ -107,9 +107,9 @@ This produced a single raw CSV, `uk_generation_mix_12mo.csv`, covering 17,012 ha
 
 **Notebook:** [uk_generation_mix_cleaned.ipynb](./uk_generation_mix_cleaned.ipynb)
 
-This single notebook covers the full Python side of the project: cleaning the raw API export, deriving every time based column, exploring the data with charts, and finally loading the cleaned result straight into MySQL. Keeping this in one notebook meant the cleaned dataframe could be pushed into MySQL directly with `pandas.to_sql()`, without needing to re read a CSV in a separate file first.
+This single notebook covers the full Python side of the project: cleaning the raw exported data, deriving every time based column, exploring the data with charts, and finally loading the cleaned result straight into MySQL. Keeping this in one notebook meant the cleaned dataframe could be pushed into MySQL directly with `pandas.to_sql()`, without needing to re read a CSV in a separate file first.
 
-Before any analysis, the raw API export needed genuine cleaning, most notably a subtle timezone bug that would have blocked the MySQL load entirely if left unfixed.
+Before any analysis, the raw exported data needed genuine cleaning, most notably a subtle timezone bug that would have blocked the MySQL load entirely if left unfixed.
 
 **Renaming columns for clarity**
 
@@ -312,7 +312,7 @@ This is a single page report, designed to answer the project's headline question
 
 ## Skills This Project Demonstrates
 
-- End to end data pipeline construction, from a live public API through Python cleaning, MySQL loading, SQL analysis, and finally an interactive Power BI report
+- End to end data pipeline construction, from a public data website through Python cleaning, MySQL loading, SQL analysis, and finally an interactive Power BI report
 - Diagnosing and fixing a genuine, non obvious data bug, a British Summer Time clock change producing an invalid datetime value, rather than only working with pre cleaned data
 - Data quality verification as a habit, including checking that fuel percentages summed close to 100 per cent, and confirming a top result with a targeted follow up query rather than accepting it at face value
 - SQL query writing across aggregation, grouping, window functions, and multi dimensional business questions
@@ -350,7 +350,7 @@ This is a single page report, designed to answer the project's headline question
 
 ## Data Source
 
-National Grid ESO, [Carbon Intensity API](https://carbonintensity.org.uk/), generation mix and carbon intensity data, freely available under an open licence.
+National Grid ESO, [Carbon Intensity website](https://carbonintensity.org.uk/), generation mix and carbon intensity data, freely available under an open licence.
 
 ---
 
