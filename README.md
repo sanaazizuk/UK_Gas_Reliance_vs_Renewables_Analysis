@@ -141,15 +141,31 @@ Month, month number, hour, day of week, date, and a UK meteorological season lab
 
 A day was flagged as a low wind day if its average wind output across all 48 half hour periods fell below 10 per cent. This produced **17 low wind days**, out of **356 total days**, roughly 5 per cent of the year, confirmed with a direct count check before being used anywhere else in the project.
 
+**A first look at the data with simple Matplotlib charts**
+
+With the data cleaned and every derived column in place, three quick charts were built directly in the notebook to sanity check the story before moving on to SQL or Power BI.
+
+![Average gas share by month](images/py_06_monthly_gas_chart.png)
+
+Gas share by month, plotted as a simple line chart, immediately showed the seasonal curve later confirmed in SQL, peaking around January at close to 32 per cent and dropping to its lowest near June at just under 20 per cent.
+
+![Average gas share by season](images/py_07_seasonal_gas_chart.png)
+
+The same pattern grouped by season as a bar chart, winter and autumn both sitting noticeably above spring and summer.
+
+![Gas share, low wind days vs rest of year](images/py_08_low_wind_chart.png)
+
+The single most important chart in the whole project, gas share nearly doubling on low wind days compared with the rest of the year, built here in Python before this same result was later verified independently in both SQL and Power BI.
+
 **Fixing a genuine timezone bug**
 
-![Fixing the BST clock change bug](images/py_06_timezone_fix.png)
+![Fixing the BST clock change bug](images/py_09_timezone_fix.png)
 
 While loading the cleaned data into MySQL, a single row failed with an "incorrect datetime value" error for 29 March 2026 at 1am. This is the exact date and hour the UK clocks spring forward for British Summer Time, meaning that specific local time technically does not exist. The fix was to force every timestamp to be interpreted as UTC first, then strip the timezone label afterwards, rather than trying to store an ambiguous local time directly.
 
 **Loading into MySQL**
 
-![Loading the cleaned data into MySQL](images/py_07_mysql_load.png)
+![Loading the cleaned data into MySQL](images/py_10_mysql_load.png)
 
 The cleaned dataframe was loaded into a local MySQL database using `pandas.to_sql()` with `sqlalchemy` and `pymysql`, rather than `LOAD DATA INFILE`, which repeatedly hit local file permission restrictions in this environment. Row count in MySQL matched the cleaned dataframe exactly, 17,012 rows.
 
@@ -315,6 +331,7 @@ This is a single page report, designed to answer the project's headline question
 - End to end data pipeline construction, from a public data website through Python cleaning, MySQL loading, SQL analysis, and finally an interactive Power BI report
 - Diagnosing and fixing a genuine, non obvious data bug, a British Summer Time clock change producing an invalid datetime value, rather than only working with pre cleaned data
 - Data quality verification as a habit, including checking that fuel percentages summed close to 100 per cent, and confirming a top result with a targeted follow up query rather than accepting it at face value
+- Exploratory data visualisation in Python with Matplotlib, used to sanity check the core finding before it was ever queried in SQL or built into Power BI
 - SQL query writing across aggregation, grouping, window functions, and multi dimensional business questions
 - Power BI report design, including a custom theme, DAX measures, calculated and conditional columns, a colour scaled heatmap matrix, and season filtered comparison charts
 - Translating raw statistics into a clear, honest, plain English finding, including being upfront about a relatively small sample size, 17 low wind days, rather than presenting it as more robust than it is
