@@ -382,11 +382,14 @@ I built this report as part of my own practice in data analysis and business int
 
 Feel free to open the .pbix file yourself, explore the report, and reach out with any questions or feedback.
 
+
+---
 ## Contact
 
-**[Your Name]**
+**Sana Aziz**
 
-Data Analyst | SQL • Power BI • Python
+Data Analyst | SQL • Excel • Power BI • Tableau • Python
 
 London, UK
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-your--profile--url-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/your-profile-url/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-sana--aziz--analyst--uk-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sana-aziz-analyst-uk/)
+
